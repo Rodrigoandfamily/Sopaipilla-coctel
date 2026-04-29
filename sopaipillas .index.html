@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sopai·cóctel — Sopaipillas de cóctel gourmet</title>
+<link rel="preconnect" href="https://cdn.fontsource.com">
+<link href="https://cdn.fontsource.com/fonts/inter/400.css" rel="stylesheet">
+<link href="https://cdn.fontsource.com/fonts/inter/500.css" rel="stylesheet">
+<link href="https://cdn.fontsource.com/fonts/inter/600.css" rel="stylesheet">
+<link href="https://cdn.fontsource.com/fonts/inter/700.css" rel="stylesheet">
+<link href="https://cdn.fontsource.com/fonts/inter/800.css" rel="stylesheet">
+<link href="https://cdn.fontsource.com/fonts/inter/900.css" rel="stylesheet">
+<link href="https://cdn.fontsource.com/fonts/playfair-display/700.css" rel="stylesheet">
+<link href="https://cdn.fontsource.com/fonts/playfair-display/800.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        serif: ['Playfair Display', 'serif'],
+      },
+      colors: {
+        brand: {
+          pink: '#E8437A',
+          'pink-dark': '#D13568',
+          green: '#6B9B37',
+          'green-dark': '#5A8530',
+          orange: '#F5932A',
+          'orange-dark': '#E08520',
+          cream: '#FBF7F3',
+          dark: '#1A1209',
+          'dark-card': '#2A1E14',
+        }
+      }
+    }
+  }
+}
+</script>
+<style>
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: #FBF7F3;
+  overflow-x: hidden;
+}
+
+.loading-screen { position: fixed; inset: 0; background: #FBF7F3; z-index: 100; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease, visibility 0.5s ease; }
+.loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.loading-spinner { width: 60px; height: 60px; border: 3px solid #E8437A20; border-top-color: #E8437A; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.tilt-card { transform-style: preserve-3d; perspective: 1000px; transition: transform 0.4s cubic-bezier(0.03, 0.98, 0.52, 0.99); will-change: transform; }
+.tilt-card:hover { transform: rotateY(-5deg) rotateX(5deg) scale3d(1.03, 1.03, 1.03); }
+.tilt-card-green:hover { transform: rotateY(3deg) rotateX(-3deg) scale3d(1.03, 1.03, 1.03); }
+.tilt-card-orange:hover { transform: rotateY(-2deg) rotateX(2deg) scale3d(1.03, 1.03, 1.03); }
+
+.event-card { transform-style: preserve-3d; perspective: 800px; transition: transform 0.35s ease, box-shadow 0.35s ease; will-change: transform; }
+.event-card:hover { transform: translateY(-8px) rotateX(3deg) scale3d(1.02, 1.02, 1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+
+@keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-15px) rotate(2deg); } }
+@keyframes floatReverse { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-10px) rotate(-2deg); } }
+@keyframes pulse-soft { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.9; } }
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-float-reverse { animation: floatReverse 5s ease-in-out infinite 1s; }
+.animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+
+.reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+.reveal-delay-6 { transition-delay: 0.6s; }
+
+.shadow-3d { box-shadow: 0 1px 2px rgba(0,0,0,0.07), 0 4px 8px rgba(0,0,0,0.07), 0 12px 24px rgba(0,0,0,0.1), 0 24px 48px rgba(0,0,0,0.07); }
+.shadow-3d-hover { transition: box-shadow 0.4s ease, transform 0.4s ease; }
+.shadow-3d-hover:hover { box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 8px 16px rgba(0,0,0,0.05), 0 20px 40px rgba(0,0,0,0.08), 0 40px 60px rgba(0,0,0,0.05); }
+
+.bg-hero-gradient { background: linear-gradient(135deg, #FBF7F3 0%, #F8E8EC 30%, #F5E6D8 60%, #F5E0D0 100%); }
+.bg-pebre-gradient { background: linear-gradient(135deg, #3D2517 0%, #2A1E14 40%, #1A1209 100%); }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #FBF7F3; }
+::-webkit-scrollbar-thumb { background: #D4C5B5; border-radius: 3px; }
+
+.whatsapp-float { animation: pulse-soft 2s ease-in-out infinite; }
+
+.nav-glass { background: rgba(251,247,243,0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+
+.pack-glow { position: relative; }
+.pack-glow::before { content: ''; position: absolute; inset: -2px; border-radius: inherit; background: linear-gradient(135deg, #E8437A, #F5932A, #6B9B37); z-index: -1; opacity: 0.6; filter: blur(12px); }
+
+.ingredient-badge { transition: all 0.3s ease; }
+.ingredient-badge:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+
+.mobile-menu { transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+.mobile-menu.open { transform: translateX(0); }
+
+.hero-img-container { transform-style: preserve-3d; perspective: 1000px; }
+.hero-img-container img { transition: transform 0.6s cubic-bezier(0.03, 0.98, 0.52, 0.99); }
+
+.plate-shadow { filter: blur(20px); background: radial-gradient(ellipse, rgba(0,0,0,0.2) 0%, transparent 70%); }
+
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #E8437A, #F5932A); z-index: 101; transition: width 0.1s ease; }
+
+.custom-cursor { width: 20px; height: 20px; border: 2px solid #E8437A; border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transition: transform 0.15s ease, opacity 0.15s ease; mix-blend-mode: difference; }
+.custom-cursor.hidden { opacity: 0; }
+.custom-cursor.hovering { transform: scale(2); background: #E8437A20; }
+@media (hover: none) { .custom-cursor { display: none; } }
+
+@media (max-width: 640px) { .responsive-title { font-size: 2.5rem !important; line-height: 1.1 !important; } }
+@media (min-width: 641px) and (max-width: 1024px) { .responsive-title { font-size: 3.5rem !important; } }
+@media (min-width: 1025px) { .responsive-title { font-size: 4rem !important; } }
+
+.glow-hover { transition: filter 0.3s ease; }
+.glow-hover:hover { filter: drop-shadow(0 0 20px rgba(232, 67, 122, 0.3)); }
+
+.magnetic-btn { transition: transform 0.3s cubic-bezier(0.03, 0.98, 0.52, 0.99); }
+</style>
+</head>
+<body class="text-brand-dark">
+
+<div id="loadingScreen" class="loading-screen">
+  <div class="flex flex-col items-center gap-4">
+    <div class="loading-spinner"></div>
+    <span class="text-brand-dark/60 text-sm font-medium">Preparando tu bandeja...</span>
+  </div>
+</div>
+
+<div id="progressBar" class="progress-bar" style="width: 0%"></div>
+<div id="customCursor" class="custom-cursor hidden"></div>
+
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 nav-glass transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 lg:h-20">
+      <a href="#" class="flex items-center gap-2 group">
+        <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-brand-pink to-brand-orange flex items-center justify-center transition-transform group-hover:scale-110">
+          <svg class="w-4 h-4 lg:w-5 lg:h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        </div>
+        <span class="font-serif font-bold text-lg lg:text-xl text-brand-dark">Sopai<span class="text-brand-pink">·</span>coctel</span>
+      </a>
+      <div class="hidden lg:flex items-center gap-8">
+        <a href="#sabores" class="text-sm font-medium text-brand-dark/70 hover:text-brand-dark transition-colors nav-link">Sabores</a>
+        <a href="#eventos" class="text-sm font-medium text-brand-dark/70 hover:text-brand-dark transition-colors nav-link">Eventos</a>
+        <a href="#pebre" class="text-sm font-medium text-brand-dark/70 hover:text-brand-dark transition-colors nav-link">Pebre</a>
+        <a href="#pack" class="text-sm font-medium text-brand-dark/70 hover:text-brand-dark transition-colors nav-link">Pack</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="https://wa.me/56959731676" class="hidden sm:inline-flex items-center gap-2 bg-brand-pink hover:bg-brand-pink-dark text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all hover:scale-105 shadow-lg shadow-brand-pink/25 magnetic-btn">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 01-4.243-1.213l-.257-.154-2.868.852.852-2.868-.154-.257A8 8 0 1112 20z"/></svg>
+          Pedir
+        </a>
+        <button id="menuBtn" class="lg:hidden p-2 rounded-lg hover:bg-black/5 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="mobileMenu" class="mobile-menu fixed top-0 right-0 h-full w-72 bg-white/95 backdrop-blur-xl shadow-2xl z-50 lg:hidden">
+    <div class="p-6">
+      <button id="closeMenuBtn" class="absolute top-5 right-5 p-2 rounded-lg hover:bg-black/5">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div class="mt-12 flex flex-col gap-4">
+        <a href="#sabores" class="text-lg font-medium py-3 border-b border-black/5" onclick="closeMenu()">Sabores</a>
+        <a href="#eventos" class="text-lg font-medium py-3 border-b border-black/5" onclick="closeMenu()">Eventos</a>
+        <a href="#pebre" class="text-lg font-medium py-3 border-b border-black/5" onclick="closeMenu()">Pebre</a>
+        <a href="#pack" class="text-lg font-medium py-3 border-b border-black/5" onclick="closeMenu()">Pack</a>
+        <a href="https://wa.me/56959731676" class="mt-4 flex items-center justify-center gap-2 bg-brand-pink text-white font-semibold px-6 py-3 rounded-full">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+          Pedir por WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section id="hero" class="relative bg-hero-gradient min-h-screen flex items-center pt-16 lg:pt-20 overflow-hidden">
+  <canvas id="particleCanvas" class="absolute inset-0 pointer-events-none"></canvas>
+  
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="parallax-bg absolute -top-20 -right-20 w-96 h-96 bg-brand-pink/10 rounded-full blur-3xl" data-speed="0.02"></div>
+    <div class="parallax-bg absolute top-1/3 -left-32 w-80 h-80 bg-brand-orange/10 rounded-full blur-3xl" data-speed="0.03"></div>
+    <div class="parallax-bg absolute bottom-10 right-1/4 w-64 h-64 bg-brand-green/10 rounded-full blur-3xl" data-speed="0.015"></div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-0">
+    <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      
+      <div class="text-center lg:text-left order-2 lg:order-1">
+        <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 mb-6 shadow-sm reveal">
+          <svg class="w-4 h-4 text-brand-orange" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span class="text-xs sm:text-sm font-medium text-brand-dark/80">Artesanales · Hechas a mano</span>
+        </div>
+
+        <h1 class="font-serif font-bold leading-tight mb-4 reveal reveal-delay-1 responsive-title">
+          Sopaipillas<br>
+          de <span class="text-brand-pink italic">cóctel</span><br>
+          <span class="text-brand-green italic">gourmet.</span>
+        </h1>
+
+        <p class="text-brand-dark/60 text-base sm:text-lg max-w-lg mx-auto lg:mx-0 mb-6 leading-relaxed reveal reveal-delay-2">
+          Mini sopaipillas de <strong class="text-brand-dark">betarraga, espinaca y zapallo</strong>, acompañadas de pebre fresco. Perfectas para cócteles, reuniones y matrimonios.
+        </p>
+
+        <div class="flex items-center justify-center lg:justify-start gap-3 mb-6 reveal reveal-delay-3">
+          <span class="font-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-brand-dark price-tag">
+            $<span id="priceCounter" class="counter-animate">0</span>
+          </span>
+          <div class="flex flex-col">
+            <span class="text-xs text-brand-dark/50">/ bandeja</span>
+            <span class="text-xs text-brand-green font-semibold">45 piezas</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start reveal reveal-delay-4">
+          <a href="https://wa.me/56959731676?text=Hola!%20Quiero%20pedir%20una%20bandeja%20de%20sopaipillas%20de%20cóctel" class="inline-flex items-center justify-center gap-2 bg-brand-pink hover:bg-brand-pink-dark text-white font-semibold px-8 py-3.5 rounded-full transition-all hover:scale-105 shadow-lg shadow-brand-pink/30 text-sm sm:text-base magnetic-btn">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+            Pedir por WhatsApp
+          </a>
+          <a href="#sabores" class="inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-brand-dark font-semibold px-8 py-3.5 rounded-full transition-all hover:scale-105 border-2 border-brand-dark/10 text-sm sm:text-base magnetic-btn">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            Ver sabores
+          </a>
+        </div>
+
+        <div class="flex flex-wrap gap-4 justify-center lg:justify-start mt-8 reveal reveal-delay-5">
+          <div class="flex items-center gap-2 text-sm text-brand-dark/60">
+            <svg class="w-4 h-4 text-brand-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Retiro disponible
+          </div>
+          <div class="flex items-center gap-2 text-sm text-brand-dark/60">
+            <svg class="w-4 h-4 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Pedidos por encargo
+          </div>
+        </div>
+      </div>
+
+      <div class="relative flex justify-center order-1 lg:order-2">
+        <div class="scene-3d relative">
+          <div class="absolute -top-4 right-4 sm:top-2 sm:right-2 lg:-top-2 lg:-right-4 z-10 animate-float">
+            <div class="bg-white rounded-2xl shadow-lg px-4 py-3 flex items-center gap-2 rotate-3">
+              <span class="text-xs font-medium text-brand-dark/60">Incluye</span>
+              <span class="font-bold text-brand-dark text-sm">Pebre 🌶️</span>
+            </div>
+          </div>
+
+          <div id="heroImgContainer" class="hero-img-container relative animate-float-reverse glow-hover">
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-pink/15 to-brand-orange/15 rounded-full blur-3xl scale-110"></div>
+            <div class="plate-shadow absolute -bottom-4 left-1/2 -translate-x-1/2 w-[90%] h-8"></div>
+            
+            <img id="heroImage" 
+                 src="https://image.qwenlm.ai/public_source/abeea59f-349f-464a-a6ec-4aeba8c1e968/17ceab41d-6d5e-43de-beaa-843c7ff3eca2.png" 
+                 alt="Sopaipillas de betarraga con pebre fresco" 
+                 class="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-[400px] lg:h-[400px] object-cover rounded-full shadow-2xl img-reveal"
+                 style="transform: perspective(800px) rotateY(-3deg) rotateX(2deg);">
+          </div>
+
+          <div class="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-6 z-10 animate-float">
+            <div class="bg-brand-orange text-white rounded-full px-4 py-2 text-xs sm:text-sm font-bold shadow-lg -rotate-6">
+              100% artesanal
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="scrollIndicator" class="absolute bottom-8 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-2 text-brand-dark/40">
+    <span class="text-xs">Descubre más</span>
+    <div class="w-5 h-8 border-2 border-brand-dark/20 rounded-full flex justify-center pt-1">
+      <div class="w-1 h-2 bg-brand-dark/40 rounded-full animate-bounce"></div>
+    </div>
+  </div>
+</section>
+
+<section id="sabores" class="py-16 lg:py-24 bg-brand-cream relative overflow-hidden">
+  <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand-pink/20 to-transparent"></div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12 lg:mb-16">
+      <span class="inline-block text-brand-pink font-semibold text-sm tracking-wider uppercase mb-3 reveal">3 Sabores Únicos</span>
+      <h2 class="font-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-brand-dark reveal reveal-delay-1">
+        Color, sabor y <span class="text-brand-green italic">vegetales</span> reales.
+      </h2>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div class="tilt-card group cursor-pointer reveal reveal-delay-1" style="transform: rotate(-3deg);">
+        <div class="relative bg-gradient-to-br from-brand-pink to-[#D13568] rounded-3xl p-6 sm:p-8 shadow-3d shadow-3d-hover overflow-hidden">
+          <div class="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+          <div class="relative w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+          </div>
+          <div class="relative">
+            <h3 class="font-serif font-bold text-2xl text-white mb-2">Betarraga</h3>
+            <p class="text-white/80 text-sm leading-relaxed">Color rubí intenso, sabor terroso y dulzor natural.</p>
+            <div class="flex items-center justify-between mt-6 pt-4 border-t border-white/15">
+              <span class="text-white/70 text-xs font-medium">Mini formato cóctel</span>
+              <span class="text-white/90 text-xs font-medium">Hechas a mano</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tilt-card tilt-card-green group cursor-pointer reveal reveal-delay-2" style="transform: rotate(1deg); margin-top: 20px;">
+        <div class="relative bg-gradient-to-br from-brand-green to-[#5A8530] rounded-3xl p-6 sm:p-8 shadow-3d shadow-3d-hover overflow-hidden">
+          <div class="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+          <div class="relative w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          </div>
+          <div class="relative">
+            <h3 class="font-serif font-bold text-2xl text-white mb-2">Espinaca</h3>
+            <p class="text-white/80 text-sm leading-relaxed">Verde profundo, suave y con un toque herbal fresco.</p>
+            <div class="flex items-center justify-between mt-6 pt-4 border-t border-white/15">
+              <span class="text-white/70 text-xs font-medium">Mini formato cóctel</span>
+              <span class="text-white/90 text-xs font-medium">Hechas a mano</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tilt-card tilt-card-orange group cursor-pointer reveal reveal-delay-3" style="transform: rotate(-1deg); margin-top: 40px;">
+        <div class="relative bg-gradient-to-br from-brand-orange to-[#E08520] rounded-3xl p-6 sm:p-8 shadow-3d shadow-3d-hover overflow-hidden">
+          <div class="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+          <div class="relative w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+          </div>
+          <div class="relative">
+            <h3 class="font-serif font-bold text-2xl text-white mb-2">Zapallo</h3>
+            <p class="text-white/80 text-sm leading-relaxed">Clásicas doradas, esponjosas y con dulzor cálido.</p>
+            <div class="flex items-center justify-between mt-6 pt-4 border-t border-white/15">
+              <span class="text-white/70 text-xs font-medium">Mini formato cóctel</span>
+              <span class="text-white/90 text-xs font-medium">Hechas a mano</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="eventos" class="py-16 lg:py-24 bg-gradient-to-b from-brand-cream to-[#F5E6D8]/50 relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12 lg:mb-16">
+      <span class="inline-block text-brand-pink font-semibold text-sm tracking-wider uppercase mb-3 reveal">Para tus eventos</span>
+      <h2 class="font-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-brand-dark reveal reveal-delay-1">
+        Para cada <span class="text-brand-green italic">ocasión.</span>
+      </h2>
+      <p class="text-brand-dark/60 text-base sm:text-lg mt-4 max-w-2xl mx-auto reveal reveal-delay-2">
+        Mini, coloridas y listas para servir. La opción perfecta para sorprender en cualquier celebración.
+      </p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div class="event-card bg-white rounded-2xl p-5 sm:p-6 border-2 border-transparent hover:border-brand-pink/20 reveal reveal-delay-1" style="transition-delay: 0.05s;">
+        <div class="w-12 h-12 bg-gradient-to-br from-brand-pink to-[#D13568] rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+        </div>
+        <h3 class="font-serif font-bold text-lg text-brand-dark mb-2">Cumpleaños</h3>
+        <p class="text-brand-dark/50 text-sm">Sorprende con un picoteo distinto y colorido.</p>
+      </div>
+      <div class="event-card bg-white rounded-2xl p-5 sm:p-6 border-2 border-transparent hover:border-brand-green/20 reveal reveal-delay-2" style="transition-delay: 0.1s;">
+        <div class="w-12 h-12 bg-gradient-to-br from-brand-green to-[#5A8530] rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        </div>
+        <h3 class="font-serif font-bold text-lg text-brand-dark mb-2">Matrimonios</h3>
+        <p class="text-brand-dark/50 text-sm">Cóctel de bienvenida con sello artesanal.</p>
+      </div>
+      <div class="event-card bg-white rounded-2xl p-5 sm:p-6 border-2 border-transparent hover:border-brand-orange/20 reveal reveal-delay-3" style="transition-delay: 0.15s;">
+        <div class="w-12 h-12 bg-gradient-to-br from-brand-orange to-[#E08520] rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        </div>
+        <h3 class="font-serif font-bold text-lg text-brand-dark mb-2">Reuniones</h3>
+        <p class="text-brand-dark/50 text-sm">Para juntas con amigos o family gatherings.</p>
+      </div>
+      <div class="event-card bg-white rounded-2xl p-5 sm:p-6 border-2 border-transparent hover:border-brand-pink/20 reveal reveal-delay-4" style="transition-delay: 0.2s;">
+        <div class="w-12 h-12 bg-gradient-to-br from-brand-pink to-[#D13568] rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        </div>
+        <h3 class="font-serif font-bold text-lg text-brand-dark mb-2">Eventos corporativos</h3>
+        <p class="text-brand-dark/50 text-sm">Coffee breaks y after office gourmet.</p>
+      </div>
+      <div class="event-card bg-white rounded-2xl p-5 sm:p-6 border-2 border-transparent hover:border-brand-green/20 reveal reveal-delay-5" style="transition-delay: 0.25s;">
+        <div class="w-12 h-12 bg-gradient-to-br from-brand-green to-[#5A8530] rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3 class="font-serif font-bold text-lg text-brand-dark mb-2">Baby showers</h3>
+        <p class="text-brand-dark/50 text-sm">Lindo, fotogénico y para todas las edades.</p>
+      </div>
+      <div class="event-card bg-white rounded-2xl p-5 sm:p-6 border-2 border-transparent hover:border-brand-orange/20 reveal reveal-delay-6" style="transition-delay: 0.3s;">
+        <div class="w-12 h-12 bg-gradient-to-br from-brand-orange to-[#E08520] rounded-xl flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+        </div>
+        <h3 class="font-serif font-bold text-lg text-brand-dark mb-2">Celebraciones</h3>
+        <p class="text-brand-dark/50 text-sm">Bautizos, graduaciones y cualquier excusa.</p>
+      </div>
+    </div>
+    <div class="mt-8 sm:mt-12 reveal reveal-delay-4">
+      <div class="bg-brand-dark rounded-2xl sm:rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 shadow-2xl">
+        <div class="flex-1 text-center sm:text-left">
+          <h3 class="font-serif font-bold text-xl sm:text-2xl text-white mb-2">¿Evento grande?</h3>
+          <p class="text-white/60 text-sm sm:text-base">Pide múltiples bandejas y coordinamos todo por WhatsApp.</p>
+        </div>
+        <a href="https://wa.me/56959731676?text=Hola!%20Necesito%20cotizar%20un%20evento%20grande" class="flex-shrink-0 inline-flex items-center gap-2 bg-brand-orange hover:bg-brand-orange-dark text-white font-semibold px-6 py-3 rounded-full transition-all hover:scale-105 text-sm magnetic-btn">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          Cotizar evento
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pebre" class="py-16 lg:py-24 bg-pebre-gradient relative overflow-hidden">
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-10 left-10 w-72 h-72 bg-brand-orange/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-10 right-10 w-96 h-96 bg-brand-pink/5 rounded-full blur-3xl"></div>
+  </div>
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <div>
+        <div class="inline-block bg-brand-orange/20 rounded-full px-4 py-2 mb-6 reveal">
+          <span class="text-brand-orange text-sm font-semibold">Todo incluido</span>
+        </div>
+        <h2 class="font-serif font-bold text-3xl sm:text-4xl lg:text-5xl text-white leading-tight mb-6 reveal reveal-delay-1">
+          Con <span class="text-brand-orange">pebre</span> fresco<br>
+          recién hecho.
+        </h2>
+        <p class="text-white/60 text-base sm:text-lg leading-relaxed mb-8 reveal reveal-delay-2">
+          Tomate, cebolla, cilantro y ají verde, picados a mano. La compañía perfecta para realzar cada sopaipilla. Sin colorantes, sin conservantes, solo ingredientes reales.
+        </p>
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 reveal reveal-delay-3">
+          <div class="ingredient-badge bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 flex items-center gap-3 cursor-default">
+            <div class="w-2 h-2 bg-brand-orange rounded-full"></div>
+            <span class="text-white/90 text-sm font-medium">Tomate</span>
+          </div>
+          <div class="ingredient-badge bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 flex items-center gap-3 cursor-default">
+            <div class="w-2 h-2 bg-brand-orange rounded-full"></div>
+            <span class="text-white/90 text-sm font-medium">Cebolla</span>
+          </div>
+          <div class="ingredient-badge bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 flex items-center gap-3 cursor-default">
+            <div class="w-2 h-2 bg-brand-orange rounded-full"></div>
+            <span class="text-white/90 text-sm font-medium">Cilantro</span>
+          </div>
+          <div class="ingredient-badge bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 flex items-center gap-3 cursor-default">
+            <div class="w-2 h-2 bg-brand-orange rounded-full"></div>
+            <span class="text-white/90 text-sm font-medium">Ají verde</span>
+          </div>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-2" id="pack">
+        <div class="pack-glow">
+          <div class="relative bg-brand-dark-card rounded-3xl p-6 sm:p-8 border border-brand-pink/30">
+            <div class="inline-block bg-brand-pink/20 rounded-full px-3 py-1 mb-4">
+              <span class="text-brand-pink text-xs font-semibold uppercase tracking-wider">El Pack</span>
+            </div>
+            <h3 class="font-serif font-bold text-2xl sm:text-3xl text-white mb-3">Bandeja Cóctel</h3>
+            <p class="text-white/50 text-sm mb-4">45 mini sopaipillas tricolor + pebre fresco. Lista para servir.</p>
+            <div class="space-y-2 mb-6">
+              <div class="flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4 text-brand-orange flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span class="text-white/70">15 betarraga · 15 espinaca · 15 zapallo</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4 text-brand-orange flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span class="text-white/70">Pebre fresco incluido</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4 text-brand-orange flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <span class="text-white/70">Rinde 8–10 personas</span>
+              </div>
+            </div>
+            <div class="flex items-end gap-2 mb-4 pt-4 border-t border-white/10">
+              <span class="font-serif font-bold text-3xl sm:text-4xl text-brand-orange price-tag">$18.990</span>
+            </div>
+            <a href="https://wa.me/56959731676?text=Hola!%20Quiero%20pedir%20una%20bandeja%20de%20sopaipillas%20de%20cóctel%20por%20$18.990" class="w-full inline-flex items-center justify-center gap-2 bg-brand-orange hover:bg-brand-orange-dark text-white font-semibold px-8 py-3.5 rounded-full transition-all hover:scale-[1.02] shadow-lg shadow-brand-orange/25 magnetic-btn">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+              Pedir ahora
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-16 lg:py-24 bg-brand-cream relative">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="reveal">
+      <div class="bg-white rounded-3xl sm:rounded-[2rem] p-8 sm:p-12 shadow-3d border-2 border-brand-pink/20 text-center relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-brand-pink/10 to-transparent rounded-bl-full"></div>
+        <div class="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-brand-green/10 to-transparent rounded-tr-full"></div>
+        <div class="relative">
+          <div class="inline-block bg-brand-green/10 rounded-full px-4 py-2 mb-6">
+            <span class="text-brand-green text-sm font-semibold">Retiro y Entrega</span>
+          </div>
+          <div class="font-serif font-bold text-3xl sm:text-4xl text-brand-dark mb-4">
+            45 piezas. <span class="text-brand-pink">$18.990.</span>
+          </div>
+          <p class="text-brand-dark/60 text-base sm:text-lg max-w-xl mx-auto mb-8">
+            Una bandeja completa para 8–10 personas. Coordinamos retiro o entrega directamente por WhatsApp.
+          </p>
+          <a href="https://wa.me/56959731676?text=Hola!%20Quiero%20coordinar%20retiro%20o%20entrega%20de%20una%20bandeja%20de%20sopaipillas" class="inline-flex items-center gap-2 bg-brand-pink hover:bg-brand-pink-dark text-white font-semibold px-8 py-4 rounded-full transition-all hover:scale-105 shadow-lg shadow-brand-pink/30 text-base magnetic-btn">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+            +56 9 5973 1676
+          </a>
+          <p class="text-brand-dark/40 text-sm mt-6">Respuesta rápida · Pedidos por encargo</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="bg-brand-dark py-12 lg:py-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col items-center gap-6">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-pink to-brand-orange flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        </div>
+        <span class="font-serif font-bold text-lg text-white">Sopai<span class="text-brand-pink">·</span>coctel</span>
+      </div>
+      <div class="text-center">
+        <p class="text-white/40 text-sm">© 2026 · Sopaipillas artesanales de cóctel</p>
+        <p class="text-white/30 text-xs mt-1">WhatsApp +56 9 5973 1676</p>
+      </div>
+      <div class="flex items-center gap-4 mt-2">
+        <a href="#sabores" class="text-white/30 hover:text-white/60 text-xs transition-colors">Sabores</a>
+        <span class="text-white/10">·</span>
+        <a href="#eventos" class="text-white/30 hover:text-white/60 text-xs transition-colors">Eventos</a>
+        <span class="text-white/10">·</span>
+        <a href="#pebre" class="text-white/30 hover:text-white/60 text-xs transition-colors">Pebre</a>
+        <span class="text-white/10">·</span>
+        <a href="#pack" class="text-white/30 hover:text-white/60 text-xs transition-colors">Pack</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<a href="https://wa.me/56959731676?text=Hola!%20Quiero%20información%20sobre%20las%20sopaipillas%20de%20cóctel" 
+   class="whatsapp-float fixed bottom-6 right-6 z-40 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 transition-all hover:scale-110"
+   aria-label="Contactar por WhatsApp">
+  <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+    <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+  </svg>
+</a>
+
+<div id="menuOverlay" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 hidden lg:hidden" onclick="closeMenu()"></div>
+
+<script>
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loadingScreen').classList.add('hidden');
+    setTimeout(() => { initAnimations(); }, 300);
+  }, 1200);
+});
+
+gsap.registerPlugin(ScrollTrigger);
+function initAnimations() {
+  const heroImage = document.getElementById('heroImage');
+  if (heroImage) gsap.to(heroImage, { clipPath: 'inset(0 0% 0 0)', duration: 1.2, ease: 'power3.out', delay: 0.3 });
+
+  document.querySelectorAll('.reveal').forEach(el => {
+    gsap.fromTo(el, { opacity: 0, y: 40 }, {
+      opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none reverse' }
+    });
+  });
+
+  gsap.fromTo('.tilt-card', { opacity: 0, y: 60, rotateY: 10 }, {
+    opacity: 1, y: 0, rotateY: 0, stagger: 0.15, duration: 0.8, ease: 'power3.out',
+    scrollTrigger: { trigger: '#sabores', start: 'top 70%' }
+  });
+
+  gsap.fromTo('.event-card', { opacity: 0, y: 40, scale: 0.9 }, {
+    opacity: 1, y: 0, scale: 1, stagger: 0.1, duration: 0.6, ease: 'power3.out',
+    scrollTrigger: { trigger: '#eventos', start: 'top 70%' }
+  });
+
+  document.querySelectorAll('.parallax-bg').forEach(bg => {
+    gsap.to(bg, { y: () => window.innerHeight * (parseFloat(bg.dataset.speed) || 0.02) * 2, ease: 'none',
+      scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }
+    });
+  });
+
+  const si = document.getElementById('scrollIndicator');
+  if (si) gsap.to(si, { opacity: 0, scrollTrigger: { trigger: '#hero', start: 'top top', end: '20% top', scrub: true } });
+}
+
+function animatePriceCounter() {
+  const counter = document.getElementById('priceCounter');
+  if (!counter) return;
+  const target = 18990, dur = 2000, start = performance.now();
+  function update(t) {
+    const p = Math.min((t - start) / dur, 1);
+    counter.textContent = Math.floor((1 - Math.pow(1 - p, 3)) * target).toLocaleString('es-CL');
+    if (p < 1) requestAnimationFrame(update); else counter.textContent = '18.990';
+  }
+  new IntersectionObserver((e) => { if (e[0].isIntersecting) { requestAnimationFrame(update); e[0].target._obs?.disconnect(); } }, { threshold: 0.5 }).observe(counter);
+  counter._obs = arguments.callee.caller ? null : null;
+}
+animatePriceCounter();
+
+const menuBtn = document.getElementById('menuBtn'), closeMenuBtn = document.getElementById('closeMenuBtn'), mobileMenu = document.getElementById('mobileMenu'), menuOverlay = document.getElementById('menuOverlay');
+function openMenu() { mobileMenu.classList.add('open'); menuOverlay.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+function closeMenu() { mobileMenu.classList.remove('open'); menuOverlay.classList.add('hidden'); document.body.style.overflow = ''; }
+menuBtn.addEventListener('click', openMenu); closeMenuBtn.addEventListener('click', closeMenu);
+
+const navbar = document.getElementById('navbar');
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+  const s = window.pageYOffset;
+  navbar.classList.toggle('shadow-lg', s > 100);
+  navbar.style.transform = s > lastScroll && s > 200 ? 'translateY(-100%)' : 'translateY(0)';
+  lastScroll = s;
+  document.getElementById('progressBar').style.width = ((s / (document.documentElement.scrollHeight - window.innerHeight)) * 100) + '%';
+});
+
+document.querySelectorAll('.tilt-card').forEach(card => {
+  card.addEventListener('mousemove', (e) => {
+    const r = card.getBoundingClientRect();
+    card.style.transform = `perspective(1000px) rotateX(${(e.clientY - r.top - r.height/2)/15}deg) rotateY(${(r.width/2 - (e.clientX - r.left))/15}deg) scale3d(1.03, 1.03, 1.03)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = card.classList.contains('tilt-card-green') ? 'rotate(1deg)' : (card.classList.contains('tilt-card-orange') ? 'rotate(-1deg)' : 'rotate(-3deg)');
+  });
+});
+
+const heroImgContainer = document.getElementById('heroImgContainer'), heroImage = document.getElementById('heroImage');
+if (heroImgContainer && heroImage) {
+  heroImgContainer.addEventListener('mousemove', (e) => {
+    const r = heroImgContainer.getBoundingClientRect();
+    heroImage.style.transform = `perspective(800px) rotateY(${((e.clientX - r.left) / r.width - 0.5) * 15}deg) rotateX(${(-(e.clientY - r.top) / r.height + 0.5) * 15}deg) scale3d(1.05, 1.05, 1.05)`;
+  });
+  heroImgContainer.addEventListener('mouseleave', () => { heroImage.style.transform = 'perspective(800px) rotateY(-3deg) rotateX(2deg) scale3d(1, 1, 1)'; });
+}
+
+const heroScene = document.querySelector('.scene-3d');
+if (heroScene) window.addEventListener('scroll', () => { heroScene.style.transform = `translateY(${window.pageYOffset * 0.3}px)`; });
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', function(e) {
+    const href = this.getAttribute('href'); if (href === '#') return;
+    e.preventDefault(); const t = document.querySelector(href);
+    if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.pageYOffset - navbar.offsetHeight, behavior: 'smooth' });
+  });
+});
+
+const heroSection = document.getElementById('hero');
+if (heroSection) heroSection.addEventListener('mousemove', (e) => {
+  const x = (e.clientX / window.innerWidth - 0.5) * 20, y = (e.clientY / window.innerHeight - 0.5) * 20;
+  heroSection.querySelectorAll('.parallax-bg').forEach((el, i) => { el.style.transform = `translate(${x * (i+1) * 0.5}px, ${y * (i+1) * 0.5}px)`; });
+});
+
+document.querySelectorAll('.magnetic-btn').forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const r = btn.getBoundingClientRect();
+    btn.style.transform = `translate(${(e.clientX - r.left - r.width/2) * 0.2}px, ${(e.clientY - r.top - r.height/2) * 0.2}px) scale(1.05)`;
+  });
+  btn.addEventListener('mouseleave', () => { btn.style.transform = 'translate(0, 0) scale(1)'; });
+});
+
+const customCursor = document.getElementById('customCursor');
+if (window.matchMedia('(hover: hover)').matches && customCursor) {
+  document.addEventListener('mousemove', (e) => { customCursor.classList.remove('hidden'); customCursor.style.left = e.clientX - 10 + 'px'; customCursor.style.top = e.clientY - 10 + 'px'; });
+  document.querySelectorAll('a, button, .tilt-card, .event-card, .ingredient-badge').forEach(el => {
+    el.addEventListener('mouseenter', () => customCursor.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => customCursor.classList.remove('hovering'));
+  });
+  document.addEventListener('mouseleave', () => customCursor.classList.add('hidden'));
+}
+
+const canvas = document.getElementById('particleCanvas');
+if (canvas) {
+  const ctx = canvas.getContext('2d'); let particles = [], animId;
+  function resize() { if (heroSection) { canvas.width = heroSection.offsetWidth; canvas.height = heroSection.offsetHeight; } }
+  resize(); window.addEventListener('resize', resize);
+  class P { constructor() { this.reset(); } reset() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height; this.s = Math.random()*3+1; this.sx = (Math.random()-0.5)*0.5; this.sy = (Math.random()-0.5)*0.5; this.o = Math.random()*0.3+0.1; this.c = ['#E8437A','#F5932A','#6B9B37'][Math.floor(Math.random()*3)]; } update() { this.x+=this.sx; this.y+=this.sy; if(this.x<0||this.x>canvas.width) this.sx*=-1; if(this.y<0||this.y>canvas.height) this.sy*=-1; } draw() { ctx.beginPath(); ctx.arc(this.x,this.y,this.s,0,Math.PI*2); ctx.fillStyle=this.c; ctx.globalAlpha=this.o; ctx.fill(); ctx.globalAlpha=1; }}
+  for(let i=0;i<30;i++) particles.push(new P());
+  function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{p.update();p.draw();}); particles.forEach((a,i)=>{particles.slice(i+1).forEach(b=>{const d=Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2); if(d<120){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(232,67,122,${0.1*(1-d/120)})`;ctx.lineWidth=0.5;ctx.stroke();}});}); animId=requestAnimationFrame(animate); }
+  animate();
+}
+
+document.querySelectorAll('.ingredient-badge').forEach(b => {
+  b.addEventListener('mouseenter', () => gsap.to(b, { scale: 1.05, y: -2, duration: 0.3, ease: 'power2.out' }));
+  b.addEventListener('mouseleave', () => gsap.to(b, { scale: 1, y: 0, duration: 0.3, ease: 'power2.out' }));
+});
+
+document.querySelectorAll('.event-card').forEach(card => {
+  card.addEventListener('mousemove', (e) => {
+    const r = card.getBoundingClientRect();
+    card.style.transform = `perspective(800px) translateY(-8px) rotateX(${(e.clientY - r.top - r.height/2)/20}deg) rotateY(${(r.width/2 - (e.clientX - r.left))/20}deg) scale3d(1.02, 1.02, 1.02)`;
+    card.style.boxShadow = '0 20px 40px rgba(0,0,0,0.1)';
+  });
+  card.addEventListener('mouseleave', () => { card.style.transform = ''; card.style.boxShadow = ''; });
+});
+
+const packCard = document.querySelector('.pack-glow');
+if (packCard) gsap.fromTo(packCard, { opacity: 0, scale: 0.8, rotateY: 15 }, {
+  opacity: 1, scale: 1, rotateY: 0, duration: 1, ease: 'power3.out',
+  scrollTrigger: { trigger: packCard, start: 'top 80%', toggleActions: 'play none none reverse' }
+});
+
+gsap.fromTo('#pebre h2, #pebre p', { opacity: 0, x: -30 }, {
+  opacity: 1, x: 0, stagger: 0.15, duration: 0.8, ease: 'power3.out',
+  scrollTrigger: { trigger: '#pebre', start: 'top 70%' }
+});
+
+const navLinks = document.querySelectorAll('.nav-link'), sections = document.querySelectorAll('section[id]');
+window.addEventListener('scroll', () => {
+  const sp = window.scrollY + 100;
+  sections.forEach(s => {
+    if (sp >= s.offsetTop && sp < s.offsetTop + s.offsetHeight) {
+      navLinks.forEach(l => { l.classList.remove('text-brand-dark'); l.classList.add('text-brand-dark/70');
+        if (l.getAttribute('href') === `#${s.id}`) { l.classList.add('text-brand-dark'); l.classList.remove('text-brand-dark/70'); }
+      });
+    }
+  });
+});
+
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && mobileMenu.classList.contains('open')) closeMenu(); });
+</script>
+
+</body>
+</html>
+
